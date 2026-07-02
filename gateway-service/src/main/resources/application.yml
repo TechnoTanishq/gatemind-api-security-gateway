@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: dummy-backend
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /${segment}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+gatemind:
+  rate-limit:
+    requests: 5
+    window-seconds: 60
