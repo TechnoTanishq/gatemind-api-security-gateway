@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-
 @Service
 @RequiredArgsConstructor
 public class RateLimiterService {
@@ -15,10 +14,12 @@ public class RateLimiterService {
     private final RedisService redisService;
     private final RateLimitProperties properties;
 
-    public Mono<RateLimitResult> isAllowed(String apiKey) {
+    public Mono<RateLimitResult> isAllowed(String apiKey, String plan) {
 
         String redisKey = "rate:" + apiKey;
-        long limit = properties.getRequests();
+
+        long limit = getLimit(plan);
+
         Duration window = Duration.ofSeconds(properties.getWindowSeconds());
 
         return redisService.increment(redisKey)
@@ -41,5 +42,23 @@ public class RateLimiterService {
                                             .build())
                     );
                 });
+    }
+
+    private long getLimit(String plan) {
+
+        if (plan == null) {
+            return properties.getRequests();
+        }
+
+        return switch (plan.toUpperCase()) {
+
+            case "FREE" -> 100;
+
+            case "PRO" -> 1000;
+
+            case "ENTERPRISE" -> 10000;
+
+            default -> properties.getRequests();
+        };
     }
 }

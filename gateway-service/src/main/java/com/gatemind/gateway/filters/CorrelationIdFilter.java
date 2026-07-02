@@ -25,10 +25,15 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
                 .build();
 
         return chain.filter(modifiedExchange)
-                .then(Mono.fromRunnable(() ->
+                .then(Mono.fromRunnable(() -> {
+                    try {
                         modifiedExchange.getResponse()
                                 .getHeaders()
-                                .add(CORRELATION_ID, correlationId)));
+                                .add(CORRELATION_ID, correlationId);
+                    } catch (UnsupportedOperationException ignored) {
+                        // response already committed, header can't be added
+                    }
+                }));
     }
 
     @Override

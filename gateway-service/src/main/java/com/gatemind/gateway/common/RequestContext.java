@@ -20,6 +20,15 @@ public class RequestContext {
 
     // Filled later
 
+    private Long clientId;
+
+    private String plan;
+
+    private String status;
+
+    private String companyName;
+
+
     private String userId;
 
     private String apiKey;

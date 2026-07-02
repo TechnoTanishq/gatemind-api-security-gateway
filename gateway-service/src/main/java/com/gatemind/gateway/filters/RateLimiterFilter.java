@@ -25,8 +25,9 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
         String apiKey = exchange.getRequest()
                 .getHeaders()
                 .getFirst(GatewayConstants.API_KEY_HEADER);
+        String plan = exchange.getAttribute("plan");
 
-        return rateLimiterService.isAllowed(apiKey)
+        return rateLimiterService.isAllowed(apiKey, plan)
 
                 .flatMap(result -> {
 
