@@ -5,12 +5,10 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: dummy-backend
-          uri: http://localhost:8085
+        - id: client-service
+          uri: http://localhost:8081
           predicates:
-            - Path=/api/**
-          filters:
-            - RewritePath=/api/(?<segment>.*), /${segment}
+            - Path=/api/v1/clients/**
 
   data:
     redis:

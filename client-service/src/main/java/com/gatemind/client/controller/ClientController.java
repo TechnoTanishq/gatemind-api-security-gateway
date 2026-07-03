@@ -3,6 +3,7 @@ package com.gatemind.client.controller;
 import com.gatemind.client.dto.ApiKeyResponse;
 import com.gatemind.client.dto.UpdatePlanRequest;
 import com.gatemind.client.dto.request.CreateClientRequest;
+import com.gatemind.client.dto.response.ClientListResponse;
 import com.gatemind.client.dto.response.CreateClientResponse;
 import com.gatemind.client.service.ClientService;
 import jakarta.validation.Valid;
@@ -11,12 +12,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/clients")
 @RequiredArgsConstructor
 public class ClientController {
 
     private final ClientService clientService;
+
+    @GetMapping
+    public ResponseEntity<List<ClientListResponse>> getAllClients() {
+        return ResponseEntity.ok(clientService.getAllClients());
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

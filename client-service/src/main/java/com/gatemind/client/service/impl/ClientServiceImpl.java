@@ -2,6 +2,7 @@ package com.gatemind.client.service.impl;
 
 import com.gatemind.client.dto.request.CreateClientRequest;
 import com.gatemind.client.dto.response.ApiKeyValidationResponse;
+import com.gatemind.client.dto.response.ClientListResponse;
 import com.gatemind.client.dto.response.CreateClientResponse;
 import com.gatemind.client.entity.Client;
 import com.gatemind.client.entity.enums.ClientStatus;
@@ -13,6 +14,9 @@ import com.gatemind.client.util.ApiKeyGenerator;
 import com.gatemind.client.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +76,21 @@ public class ClientServiceImpl implements ClientService {
                                 .valid(false)
                                 .build()
                 );
+    }
+
+    @Override
+    public List<ClientListResponse> getAllClients() {
+        return clientRepository.findAll().stream()
+                .map(client -> ClientListResponse.builder()
+                        .clientId(client.getId())
+                        .companyName(client.getCompanyName())
+                        .email(client.getEmail())
+                        .plan(client.getPlan())
+                        .status(client.getStatus())
+                        .createdAt(client.getCreatedAt())
+                        .updatedAt(client.getUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 
