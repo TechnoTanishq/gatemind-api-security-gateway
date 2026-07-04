@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class AnalyticsService {
@@ -111,6 +110,43 @@ public class AnalyticsService {
 
                 .toList();
 
+    }
+
+    public ClientStatsResponse getClientStats(Long clientId) {
+
+        long totalBlocked = repository.countByClientIdAndBlockedTrue(clientId);
+
+        long blockedToday = repository.countByClientIdAndTimestampAfter(
+                clientId, Instant.now().minus(1, ChronoUnit.DAYS));
+
+        List<TopThreatResponse> topThreats = repository.topThreatsByClient(clientId)
+                .stream()
+                .map(row -> new TopThreatResponse(
+                        row[0] != null ? row[0].toString() : "UNKNOWN",
+                        (Long) row[1]))
+                .toList();
+
+        List<AttackTrendResponse> trend = repository.attackTrendByClient(clientId)
+                .stream()
+                .map(row -> new AttackTrendResponse(
+                        ((java.sql.Date) row[0]).toLocalDate(),
+                        ((Number) row[1]).longValue()))
+                .toList();
+
+        List<RecentThreatResponse> recent = repository
+                .findByClientIdAndBlockedTrueOrderByTimestampDesc(clientId, PageRequest.of(0, 10))
+                .stream()
+                .map(event -> RecentThreatResponse.builder()
+                        .timestamp(event.getTimestamp())
+                        .companyName(event.getCompanyName())
+                        .eventType(event.getEventType().name())
+                        .path(event.getPath())
+                        .ipAddress(event.getIpAddress())
+                        .reason(event.getReason())
+                        .build())
+                .toList();
+
+        return new ClientStatsResponse(totalBlocked, blockedToday, topThreats, trend, recent);
     }
 
 }

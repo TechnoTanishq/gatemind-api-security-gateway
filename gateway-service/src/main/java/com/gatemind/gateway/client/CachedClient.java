@@ -16,4 +16,6 @@ public class CachedClient {
     private String status;
 
     private String companyName;
+
+    private String backendBaseUrl;
 }

@@ -13,6 +13,8 @@ public class CreateClientResponse {
 
     private String email;
 
+    private String backendBaseUrl;
+
     private String apiKey;
 
     private String plan;

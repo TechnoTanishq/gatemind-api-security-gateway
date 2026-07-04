@@ -1,0 +1,8 @@
+Email : admin@leetcode.com
+Password : leetcode
+Api key : gm_live_47yyiq3OWyZsBDiE923tLVgpQ7XbW20F
+
+
+Email : admin@netflix.com
+Password : netflix.com
+Api key : gm_live_xtBAIkEu7mgzhNyoAz8xfve1d6duTf0O

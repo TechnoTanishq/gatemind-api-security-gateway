@@ -34,6 +34,15 @@ public class ApiKeyAuthenticationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange,
                              GatewayFilterChain chain) {
 
+        String path = exchange.getRequest().getURI().getPath();
+
+        // Skip authentication for internal admin routes
+        if (path.startsWith("/analytics") || path.startsWith("/api/v1/clients")
+                || path.startsWith("/admin") || path.startsWith("/auth") || path.startsWith("/me")) {
+            log.debug("Skipping API key auth for admin route: {}", path);
+            return chain.filter(exchange);
+        }
+
         String apiKey = exchange.getRequest()
                 .getHeaders()
                 .getFirst(API_KEY_HEADER);
@@ -65,11 +74,13 @@ public class ApiKeyAuthenticationFilter implements GlobalFilter, Ordered {
                 ctx.setPlan(cachedClient.getPlan());
                 ctx.setStatus(cachedClient.getStatus());
                 ctx.setCompanyName(cachedClient.getCompanyName());
+                ctx.setBackendBaseUrl(cachedClient.getBackendBaseUrl());
             }
 
             exchange.getAttributes().put("clientId", cachedClient.getClientId());
             exchange.getAttributes().put("plan", cachedClient.getPlan());
             exchange.getAttributes().put("status", cachedClient.getStatus());
+            exchange.getAttributes().put("backendBaseUrl", cachedClient.getBackendBaseUrl());
 
             return chain.filter(exchange);
         }
@@ -95,7 +106,8 @@ public class ApiKeyAuthenticationFilter implements GlobalFilter, Ordered {
                             response.getClientId(),
                             response.getPlan(),
                             response.getStatus(),
-                            response.getCompanyName()
+                            response.getCompanyName(),
+                            response.getBackendBaseUrl()
                     );
 
                     clientCacheService.save(cacheKey, client);
@@ -109,11 +121,13 @@ public class ApiKeyAuthenticationFilter implements GlobalFilter, Ordered {
                         ctx.setPlan(response.getPlan());
                         ctx.setStatus(response.getStatus());
                         ctx.setCompanyName(response.getCompanyName());
+                        ctx.setBackendBaseUrl(response.getBackendBaseUrl());
                     }
 
                     exchange.getAttributes().put("clientId", response.getClientId());
                     exchange.getAttributes().put("plan", response.getPlan());
                     exchange.getAttributes().put("status", response.getStatus());
+                    exchange.getAttributes().put("backendBaseUrl", response.getBackendBaseUrl());
 
                     return chain.filter(exchange);
 

@@ -52,7 +52,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t border-border-subtle pt-6 text-center text-xs text-text-muted">
-          © {new Date().getFullYear()} {APP_CONFIG.name}. Internal admin tooling — customer-facing dashboard coming later.
+          © {new Date().getFullYear()} {APP_CONFIG.name}. Made with ♥ by Tanishq Kathar 
         </div>
       </div>
     </footer>

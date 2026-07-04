@@ -14,6 +14,7 @@ public class ClientListResponse {
     private Long clientId;
     private String companyName;
     private String email;
+    private String backendBaseUrl;
     private Plan plan;
     private ClientStatus status;
     private LocalDateTime createdAt;

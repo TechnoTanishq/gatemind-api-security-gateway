@@ -18,22 +18,18 @@ export default function LoginPage() {
     return <Navigate to="/dashboard" replace />
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setSubmitting(true)
     setError('')
-
-    // Simulated network delay so the loading state actually reads as real.
-    setTimeout(() => {
-      const result = login(username.trim(), password)
-      setSubmitting(false)
-      if (result.success) {
-        const redirectTo = location.state?.from?.pathname || '/dashboard'
-        navigate(redirectTo, { replace: true })
-      } else {
-        setError(result.error)
-      }
-    }, 450)
+    const result = await login(username.trim(), password)
+    setSubmitting(false)
+    if (result.success) {
+      const redirectTo = location.state?.from?.pathname || '/dashboard'
+      navigate(redirectTo, { replace: true })
+    } else {
+      setError(result.error)
+    }
   }
 
   return (
@@ -70,16 +66,17 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-text-secondary" htmlFor="username">
-                Username
+                Email
               </label>
               <div className="flex items-center gap-2 rounded-lg border border-border-default bg-elevated px-3 py-2.5 focus-within:border-cyan/50">
                 <User size={15} className="text-text-muted" />
                 <input
                   id="username"
+                  type="email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin"
-                  autoComplete="username"
+                  placeholder="admin@gatemind.com"
+                  autoComplete="email"
                   required
                   className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
                 />
@@ -129,7 +126,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-5 text-center text-[11px] text-text-muted">
-            Temporary credentials — <span className="font-mono">admin / admin123</span>
+            Admin credentials — <span className="font-mono">admin@gatemind.com / admin123</span>
           </p>
         </form>
 

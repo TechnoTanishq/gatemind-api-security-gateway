@@ -12,9 +12,9 @@ export async function getClients() {
   return data
 }
 
-export async function registerClient({ companyName, email, plan }) {
-  // POST /api/v1/clients — returns CreateClientResponse: { clientId, companyName, email, apiKey, plan }
-  const { data } = await clientsAxiosClient.post(BASE, { companyName, email, plan })
+export async function registerClient({ companyName, email, backendBaseUrl, plan }) {
+  // POST /api/v1/clients — returns CreateClientResponse: { clientId, companyName, email, backendBaseUrl, apiKey, plan }
+  const { data } = await clientsAxiosClient.post(BASE, { companyName, email, backendBaseUrl, plan })
   return data
 }
 
@@ -46,5 +46,46 @@ export async function updateClientStatus(clientId, status) {
     throw new Error(`Unknown status "${status}" — expected ACTIVE, SUSPENDED, or REVOKED.`)
   }
   const { data } = await clientsAxiosClient.post(`${BASE}/${clientId}/${action}`)
+  return data
+}
+
+// ---------------------------------------------------------------------------
+// Auth & Client self-service — routed through gateway (port 8080)
+// These use axiosClient (not clientsAxiosClient) because the gateway
+// forwards /auth/** and /me/** to the client-service internally.
+// ---------------------------------------------------------------------------
+import axiosClient from './axiosClient'
+
+export async function signup(payload) {
+  // POST /auth/signup — returns AuthResponse: { token, role, clientId, companyName, email, apiKey }
+  const { data } = await axiosClient.post('/auth/signup', payload)
+  return data
+}
+
+export async function clientLogin(payload) {
+  // POST /auth/login — returns AuthResponse: { token, role, clientId, companyName, email }
+  const { data } = await axiosClient.post('/auth/login', payload)
+  return data
+}
+
+export async function adminLogin(payload) {
+  // POST /auth/admin/login — returns AuthResponse with ROLE_ADMIN
+  const { data } = await axiosClient.post('/auth/admin/login', payload)
+  return data
+}
+
+export async function getMyProfile(token) {
+  // GET /me — returns ClientProfileResponse
+  const { data } = await axiosClient.get('/me', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return data
+}
+
+export async function rotateMyKey(token) {
+  // POST /me/rotate-key — returns ApiKeyResponse: { apiKey }
+  const { data } = await axiosClient.post('/me/rotate-key', null, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
   return data
 }

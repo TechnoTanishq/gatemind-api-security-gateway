@@ -26,8 +26,14 @@ public class Client {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String passwordHash;
+
     @Column(nullable = false, unique = true, length = 128)
     private String apiKeyHash;
+
+    @Column
+    private String backendBaseUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

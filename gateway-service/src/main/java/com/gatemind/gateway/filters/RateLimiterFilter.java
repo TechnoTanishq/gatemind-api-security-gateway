@@ -22,6 +22,12 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange,
                              GatewayFilterChain chain) {
 
+        String path = exchange.getRequest().getURI().getPath();
+        if (path.startsWith("/analytics") || path.startsWith("/api/v1/clients")
+                || path.startsWith("/admin") || path.startsWith("/auth") || path.startsWith("/me")) {
+            return chain.filter(exchange);
+        }
+
         String apiKey = exchange.getRequest()
                 .getHeaders()
                 .getFirst(GatewayConstants.API_KEY_HEADER);

@@ -15,11 +15,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,24 +38,47 @@ public class ThreatDetectionFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        ThreatDetectionResult result = threatDetectionService.detect(exchange);
-
-        if (result.isMalicious()) {
-
-            log.warn("Threat(s) detected : {}", result.getFindings());
-
-            saveSecurityEvent(exchange, result);
-
-            return ResponseUtil.buildErrorResponse(
-                    exchange,
-                    HttpStatus.FORBIDDEN,
-                    ErrorCode.HIGH_RISK_REQUEST,
-                    "Threat(s) detected",
-                    result.getFindings()
-            );
+        String path = exchange.getRequest().getURI().getPath();
+        if (path.startsWith("/analytics") || path.startsWith("/api/v1/clients")
+                || path.startsWith("/admin") || path.startsWith("/auth") || path.startsWith("/me")) {
+            return chain.filter(exchange);
         }
 
-        return chain.filter(exchange);
+        // Join all body DataBuffers into one, read the bytes, then run detection
+        return DataBufferUtils.join(exchange.getRequest().getBody())
+                .defaultIfEmpty(exchange.getResponse().bufferFactory().wrap(new byte[0]))
+                .flatMap(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    DataBufferUtils.release(dataBuffer);
+                    String body = new String(bytes, StandardCharsets.UTF_8).toLowerCase();
+
+                    // Re-wrap the body so downstream filters/proxy can still read it
+                    DataBuffer retainedBuffer = exchange.getResponse().bufferFactory().wrap(bytes);
+                    ServerHttpRequestDecorator decoratedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
+                        @Override
+                        public Flux<DataBuffer> getBody() {
+                            return Flux.just(retainedBuffer);
+                        }
+                    };
+                    ServerWebExchange mutatedExchange = exchange.mutate().request(decoratedRequest).build();
+
+                    ThreatDetectionResult result = threatDetectionService.detect(mutatedExchange, body);
+
+                    if (result.isMalicious()) {
+                        log.warn("Threat(s) detected: {}", result.getFindings());
+                        saveSecurityEvent(mutatedExchange, result);
+                        return ResponseUtil.buildErrorResponse(
+                                mutatedExchange,
+                                HttpStatus.FORBIDDEN,
+                                ErrorCode.HIGH_RISK_REQUEST,
+                                "Threat(s) detected",
+                                result.getFindings()
+                        );
+                    }
+
+                    return chain.filter(mutatedExchange);
+                });
     }
 
     private void saveSecurityEvent(ServerWebExchange exchange, ThreatDetectionResult result) {

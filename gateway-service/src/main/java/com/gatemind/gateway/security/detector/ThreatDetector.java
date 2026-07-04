@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface ThreatDetector {
 
-    Optional<ThreatFinding> detect(ServerWebExchange exchange);
+    Optional<ThreatFinding> detect(ServerWebExchange exchange, String body);
 
 }

@@ -37,3 +37,8 @@ export async function getRecentThreats() {
   const { data } = await axiosClient.get('/analytics/recent')
   return data
 }
+
+export async function getClientStats(clientId) {
+  const { data } = await axiosClient.get(`/analytics/client-stats?clientId=${clientId}`)
+  return data
+}

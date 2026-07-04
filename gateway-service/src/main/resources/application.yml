@@ -5,10 +5,39 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: client-service
+        # Auth endpoints — public signup/login for clients
+        - id: auth-api
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth/**
+
+        # Admin API — client management (no API key required)
+        - id: client-service-api
           uri: http://localhost:8081
           predicates:
             - Path=/api/v1/clients/**
+
+        # Client self-service — requires JWT
+        - id: me-api
+          uri: http://localhost:8081
+          predicates:
+            - Path=/me/**
+
+        # Analytics API — served by the gateway itself
+        - id: analytics-api
+          uri: http://localhost:8080
+          predicates:
+            - Path=/analytics/**
+
+        # Catch-all — matches all proxy traffic (authenticated client requests).
+        # The URI here is never actually used — ProxyForwardingFilter (Order=6)
+        # intercepts the request and forwards it to the client's registered
+        # backendBaseUrl before Spring Cloud Gateway's own routing takes effect.
+        - id: proxy-catchall
+          uri: http://localhost:8085
+          predicates:
+            - Path=/**
+          order: 9999
 
   data:
     redis:

@@ -15,4 +15,6 @@ public class ApiKeyValidationResponse {
 
     private String companyName;
 
+    private String backendBaseUrl;
+
 }

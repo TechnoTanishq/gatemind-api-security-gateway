@@ -16,6 +16,9 @@ public class CreateClientRequest {
     @NotBlank(message = "Email is required")
     private String email;
 
+    @NotBlank(message = "Backend base URL is required")
+    private String backendBaseUrl;
+
     @NotNull(message = "Plan is required")
     private Plan plan;
 }

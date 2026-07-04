@@ -1,11 +1,10 @@
 import axios from 'axios'
 import { APP_CONFIG } from '../config/app'
 
-// The Client Management service is a separate microservice from the
-// analytics/gateway service, running on its own port — so it gets its
-// own Axios instance rather than sharing axiosClient.js.
+// All requests go through the Gateway (port 8080) which handles CORS and
+// routes /api/v1/clients/** to the client-service internally.
 const clientsAxiosClient = axios.create({
-  baseURL: APP_CONFIG.clientsApiBaseUrl,
+  baseURL: APP_CONFIG.apiBaseUrl,  // gateway: localhost:8080
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

@@ -18,36 +18,32 @@ public class XssDetector implements ThreatDetector {
     private final RequestDataExtractor extractor;
 
     private static final List<String> XSS_PATTERNS = List.of(
-
-            "<script",
-            "</script>",
+            "<script", "</script>",
             "javascript:",
-            "onload=",
-            "onerror=",
-            "<iframe",
-            "<img",
-            "<svg"
-
+            "onload=", "onerror=", "onclick=", "onmouseover=",
+            "<iframe", "<object", "<embed",
+            "<img", "<svg",
+            "alert(", "confirm(", "prompt(",
+            "document.cookie", "document.write",
+            "eval(",
+            "%3cscript",            // URL-encoded <script
+            "%3c%2fscript",         // URL-encoded </script>
+            "&#x3c;script"          // HTML entity encoded
     );
 
     @Override
-    public Optional<ThreatFinding> detect(ServerWebExchange exchange) {
-
+    public Optional<ThreatFinding> detect(ServerWebExchange exchange, String body) {
         RequestData request = extractor.extract(exchange);
+        String combined = request.getDecodedUrl() + " " + body.toLowerCase();
 
         for (String pattern : XSS_PATTERNS) {
-
-            if (request.getDecodedUrl().contains(pattern)) {
-
-                return Optional.of(
-                        ThreatFinding.builder()
-                                .threatType(ThreatType.XSS)
-                                .reason("Detected XSS pattern : " + pattern)
-                                .build()
-                );
+            if (combined.contains(pattern)) {
+                return Optional.of(ThreatFinding.builder()
+                        .threatType(ThreatType.XSS)
+                        .reason("Detected XSS pattern: " + pattern)
+                        .build());
             }
         }
-
         return Optional.empty();
     }
 }

@@ -17,21 +17,22 @@ public class ThreatDetectionService {
     private final List<ThreatDetector> detectors;
 
     public ThreatDetectionResult detect(ServerWebExchange exchange) {
+        return detect(exchange, "");
+    }
+
+    public ThreatDetectionResult detect(ServerWebExchange exchange, String body) {
 
         List<ThreatFinding> findings = new ArrayList<>();
 
         for (ThreatDetector detector : detectors) {
-
-            detector.detect(exchange)
+            detector.detect(exchange, body)
                     .ifPresent(findings::add);
-
         }
 
         return ThreatDetectionResult.builder()
                 .malicious(!findings.isEmpty())
                 .findings(findings)
                 .build();
-
     }
 
 }

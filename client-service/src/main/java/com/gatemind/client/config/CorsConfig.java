@@ -1,28 +1,8 @@
 package com.gatemind.client.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource; // 🟢 Non-reactive
-import org.springframework.web.filter.CorsFilter; // 🟢 Non-reactive
-
-import java.util.List;
-
-@Configuration
+// CORS is handled entirely by the Gateway Service (CorsWebFilter on port 8080).
+// This class is intentionally empty — do NOT add a CorsFilter here.
+// Adding one causes duplicate Access-Control-Allow-Origin headers which
+// the browser rejects with "contains multiple values".
 public class CorsConfig {
-
-    @Bean
-    public CorsFilter corsFilter() {
-
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return new CorsFilter(source); // 🟢 Changed return type
-    }
 }

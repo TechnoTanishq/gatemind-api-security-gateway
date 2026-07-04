@@ -1,29 +1,49 @@
 import { createContext, useContext, useState } from 'react'
-import { AUTH_STORAGE_KEY, TEMP_ADMIN_CREDENTIALS } from '../config/auth'
+import { adminLogin } from '../api/clientsApi'
+
+const ADMIN_TOKEN_KEY = 'gatemind_token'
+const ADMIN_SESSION_KEY = 'gatemind_admin_session'
 
 const AuthContext = createContext(null)
 
+function parseJwt(token) {
+  try { return JSON.parse(atob(token.split('.')[1])) } catch { return null }
+}
+
+function isExpired(token) {
+  const p = parseJwt(token)
+  if (!p?.exp) return true
+  return Date.now() / 1000 > p.exp
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY)
+    if (token && !isExpired(token)) {
+      const raw = localStorage.getItem(ADMIN_SESSION_KEY)
+      return raw ? JSON.parse(raw) : null
+    }
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+    localStorage.removeItem(ADMIN_SESSION_KEY)
+    return null
   })
 
-  function login(username, password) {
-    if (
-      username === TEMP_ADMIN_CREDENTIALS.username &&
-      password === TEMP_ADMIN_CREDENTIALS.password
-    ) {
-      const newSession = { username, loggedInAt: new Date().toISOString() }
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession))
+  async function login(email, password) {
+    try {
+      const result = await adminLogin({ email, password })
+      const newSession = { email: result.email, companyName: result.companyName }
+      localStorage.setItem(ADMIN_TOKEN_KEY, result.token)
+      localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(newSession))
       setSession(newSession)
       return { success: true }
+    } catch (err) {
+      return { success: false, error: err?.message || 'Incorrect credentials.' }
     }
-    return { success: false, error: 'Incorrect username or password.' }
   }
 
   function logout() {
-    localStorage.removeItem(AUTH_STORAGE_KEY)
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+    localStorage.removeItem(ADMIN_SESSION_KEY)
     setSession(null)
   }
 

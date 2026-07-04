@@ -43,6 +43,7 @@ public class ClientServiceImpl implements ClientService {
                 .companyName(request.getCompanyName())
                 .email(request.getEmail())
                 .apiKeyHash(apiKeyHash)
+                .backendBaseUrl(request.getBackendBaseUrl())
                 .plan(request.getPlan())
                 .status(ClientStatus.ACTIVE)
                 .build();
@@ -53,6 +54,7 @@ public class ClientServiceImpl implements ClientService {
                 .clientId(client.getId())
                 .companyName(client.getCompanyName())
                 .email(client.getEmail())
+                .backendBaseUrl(client.getBackendBaseUrl())
                 .plan(client.getPlan().name())
                 .apiKey(apiKey)
                 .build();
@@ -67,7 +69,8 @@ public class ClientServiceImpl implements ClientService {
                 .map(client -> ApiKeyValidationResponse.builder()
                         .valid(client.getStatus() == ClientStatus.ACTIVE)
                         .clientId(client.getId())
-                        .companyName(client.getCompanyName())   // <-- Add
+                        .companyName(client.getCompanyName())
+                        .backendBaseUrl(client.getBackendBaseUrl())
                         .plan(client.getPlan())
                         .status(client.getStatus())
                         .build())
@@ -85,6 +88,7 @@ public class ClientServiceImpl implements ClientService {
                         .clientId(client.getId())
                         .companyName(client.getCompanyName())
                         .email(client.getEmail())
+                        .backendBaseUrl(client.getBackendBaseUrl())
                         .plan(client.getPlan())
                         .status(client.getStatus())
                         .createdAt(client.getCreatedAt())

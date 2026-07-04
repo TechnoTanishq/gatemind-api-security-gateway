@@ -30,7 +30,7 @@ public class SuspiciousUserAgentDetector implements ThreatDetector {
     );
 
     @Override
-    public Optional<ThreatFinding> detect(ServerWebExchange exchange) {
+    public Optional<ThreatFinding> detect(ServerWebExchange exchange, String body) {
 
         RequestData request = extractor.extract(exchange);
 

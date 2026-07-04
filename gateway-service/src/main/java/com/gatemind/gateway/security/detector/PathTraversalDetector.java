@@ -17,36 +17,36 @@ public class PathTraversalDetector implements ThreatDetector {
 
     private final RequestDataExtractor extractor;
 
+    // Check both normalized and encoded variants
     private static final List<String> PATTERNS = List.of(
-
-            "../",
-            "..\\",
-            "%2e%2e",
-            "/etc/passwd",
-            "/etc/shadow",
-            "boot.ini",
-            "c:\\windows"
-
+            "../", "..\\",
+            "%2e%2e/", "%2e%2e\\",
+            "..%2f", "..%5c",
+            "%252e%252e",           // double-encoded
+            "/etc/passwd", "/etc/shadow", "/etc/hosts",
+            "boot.ini", "c:\\windows", "c:/windows",
+            "/proc/self", "/var/www",
+            "passwd", "shadow"       // catch normalized paths too
     );
 
     @Override
-    public Optional<ThreatFinding> detect(ServerWebExchange exchange) {
-
+    public Optional<ThreatFinding> detect(ServerWebExchange exchange, String body) {
         RequestData request = extractor.extract(exchange);
 
+        // Also check the raw (non-normalized) path directly from the URI
+        String rawPath = exchange.getRequest().getURI().getRawPath().toLowerCase();
+        String rawQuery = exchange.getRequest().getURI().getRawQuery() != null
+                ? exchange.getRequest().getURI().getRawQuery().toLowerCase() : "";
+        String combined = request.getDecodedUrl() + " " + rawPath + " " + rawQuery + " " + body.toLowerCase();
+
         for (String pattern : PATTERNS) {
-
-            if (request.getDecodedUrl().contains(pattern)) {
-
-                return Optional.of(
-                        ThreatFinding.builder()
-                                .threatType(ThreatType.PATH_TRAVERSAL)
-                                .reason("Detected Path Traversal : " + pattern)
-                                .build()
-                );
+            if (combined.contains(pattern)) {
+                return Optional.of(ThreatFinding.builder()
+                        .threatType(ThreatType.PATH_TRAVERSAL)
+                        .reason("Detected Path Traversal: " + pattern)
+                        .build());
             }
         }
-
         return Optional.empty();
     }
 }

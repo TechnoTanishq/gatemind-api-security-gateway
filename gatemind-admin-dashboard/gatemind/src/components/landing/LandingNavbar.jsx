@@ -38,10 +38,22 @@ export default function LandingNavbar() {
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
           <Link
-            to="/login"
+            to="/client-login"
+            className="focus-ring rounded-md border border-border-default bg-elevated px-4 py-2 text-sm font-medium text-text-secondary transition hover:text-text-primary"
+          >
+            Sign In
+          </Link>
+          <Link
+            to="/signup"
             className="focus-ring rounded-md bg-cyan px-4 py-2 text-sm font-semibold text-void transition hover:opacity-90"
           >
-            Admin Login
+            Get Started
+          </Link>
+          <Link
+            to="/login"
+            className="focus-ring rounded-md px-3 py-2 text-xs font-medium text-text-muted transition hover:text-text-secondary"
+          >
+            Admin
           </Link>
         </div>
 
@@ -61,19 +73,19 @@ export default function LandingNavbar() {
         <div className="border-t border-border-subtle bg-base px-4 py-4 md:hidden">
           <nav className="flex flex-col gap-3">
             {LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="text-sm font-medium text-text-secondary"
-              >
-                {link.label}
-              </a>
+              <a key={link.href} href={link.href} onClick={() => setOpen(false)}
+                className="text-sm font-medium text-text-secondary">{link.label}</a>
             ))}
-            <Link
-              to="/login"
-              className="focus-ring mt-2 rounded-md bg-cyan px-4 py-2 text-center text-sm font-semibold text-void"
-            >
+            <Link to="/signup" onClick={() => setOpen(false)}
+              className="focus-ring mt-2 rounded-md bg-cyan px-4 py-2 text-center text-sm font-semibold text-void">
+              Get Started
+            </Link>
+            <Link to="/client-login" onClick={() => setOpen(false)}
+              className="focus-ring rounded-md border border-border-default px-4 py-2 text-center text-sm text-text-secondary">
+              Sign In
+            </Link>
+            <Link to="/login" onClick={() => setOpen(false)}
+              className="text-center text-xs text-text-muted">
               Admin Login
             </Link>
           </nav>

@@ -43,18 +43,18 @@ export default function HeroSection() {
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              to="/login"
+              to="/signup"
               className="focus-ring group inline-flex items-center gap-2 rounded-lg bg-cyan px-5 py-3 text-sm font-semibold text-void transition hover:opacity-90"
             >
-              Admin Login
+              Start for Free
               <ArrowRight size={15} className="transition group-hover:translate-x-0.5" />
             </Link>
-            <a
-              href="#features"
+            <Link
+              to="/client-login"
               className="focus-ring inline-flex items-center gap-2 rounded-lg border border-border-default bg-elevated px-5 py-3 text-sm font-semibold text-text-primary transition hover:border-cyan/40 hover:text-cyan"
             >
-              Learn More
-            </a>
+              Sign In
+            </Link>
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2">

@@ -28,6 +28,7 @@ public class RequestContext {
 
     private String companyName;
 
+    private String backendBaseUrl;
 
     private String userId;
 
