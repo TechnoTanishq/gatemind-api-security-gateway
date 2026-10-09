@@ -106,6 +106,22 @@ npm install
 npm run dev
 ```
 
+
+# How Gatemind ensures Customer Security ?
+
+Secure secrets: Hash API keys where appropriate, store secrets securely, and support key rotation and revocation.
+
+Encryption: Use HTTPS/TLS for traffic and encrypt sensitive stored data.
+
+Tenant isolation: Ensure one customer's data, API keys, and security logs cannot be accessed by another customer.
+
+Defense against bypasses: Prevent clients from bypassing GateMind and accessing protected backends directly.
+
+Fail-safe behavior: Define secure failure policies so AI-service outages don't silently disable protection.
+
+Independent testing: Conduct penetration testing, vulnerability assessments, and eventually third-party security audits.
+
+
 ## Goal
 
 The goal of GateMind is to combine traditional API gateway security with machine learning to provide a more intelligent and adaptive layer of API protection.
